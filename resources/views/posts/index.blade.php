@@ -38,6 +38,18 @@
         .post-actions button:hover { color: #D6402C; text-decoration: underline; text-underline-offset: 3px; }
         .post-actions a:focus-visible, .post-actions button:focus-visible { outline: 2px solid #E8792B; outline-offset: 2px; border-radius: 4px; }
         .empty { color: #5B6570; text-align: center; padding: 3.5rem 1rem; }
+        .composer { padding: 1rem 1rem 1.2rem; border-bottom: 1px solid #EFF1F4; }
+        .composer .form-group { margin-bottom: 0.9rem; }
+        .composer label { display: block; color: #5B6570; margin-bottom: 0.35rem; font-size: 0.8rem; font-weight: 700; }
+        .composer input[type="text"], .composer textarea, .composer select { width: 100%; padding: 0.65rem 0.85rem; border: 1px solid #D3D9DE; border-radius: 10px; font-size: 0.95rem; font-family: inherit; background: #fff; color: #0F1419; }
+        .composer textarea { min-height: 96px; resize: vertical; line-height: 1.7; }
+        .composer input:focus, .composer textarea:focus, .composer select:focus { outline: none; border-color: #0F1419; box-shadow: 0 0 0 3px rgba(232, 121, 43, 0.18); }
+        .composer .error { color: #D6402C; font-size: 0.83rem; margin-top: 0.3rem; }
+        .composer .counter { text-align: right; color: #5B6570; font-size: 0.8rem; margin-top: 0.3rem; }
+        .composer .counter.over { color: #D6402C; font-weight: 700; }
+        .composer .btn-primary { background: #0F1419; color: #fff; border: none; padding: 0.6rem 1.7rem; border-radius: 999px; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .composer .btn-primary:hover { background: #272C30; }
+        .composer .btn-primary:focus-visible { outline: 2px solid #E8792B; outline-offset: 2px; }
     </style>
 </head>
 <body>
@@ -57,6 +69,46 @@
         </header>
 
         <main class="feed">
+            <form class="composer" action="{{ route('posts.store') }}" method="POST">
+                @csrf
+
+                <div class="form-group">
+                    <label for="title">タイトル</label>
+                    <input type="text" id="title" name="title" value="{{ old('title') }}" required>
+                    @error('title')
+                        <p class="error">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="category_id">トピック</label>
+                    <select id="category_id" name="category_id" required>
+                        <option value="">選択してください</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('category_id')
+                        <p class="error">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="content">本文</label>
+                    <textarea id="content" name="content" required>{{ old('content') }}</textarea>
+                    @php
+                        // JS が動かなくても初期表示が合うよう、サーバー側でも残り字数を計算する
+                        $remaining = 140 - mb_strlen(str_replace("\r\n", "\n", is_string(old('content')) ? old('content') : ''));
+                    @endphp
+                    <p id="content-counter" class="counter {{ $remaining < 0 ? 'over' : '' }}">{{ $remaining >= 0 ? "あと{$remaining}字" : (-$remaining).'字オーバー' }}</p>
+                    @error('content')
+                        <p class="error">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <button type="submit" class="btn-primary">投稿</button>
+            </form>
+
             @if($posts->isEmpty())
                 <p class="empty">まだポストがありません。</p>
             @else
@@ -123,5 +175,22 @@
             @endif
         </main>
     </div>
+
+    <script>
+        // 本文の残り字数を入力のたびに更新する（上限はサーバー側の max:140 と同じ）
+        const MAX_LENGTH = 140;
+        const textarea = document.getElementById('content');
+        const counter = document.getElementById('content-counter');
+
+        function updateCounter() {
+            // [...] でコードポイント単位に数え、絵文字も1字として扱う
+            const remaining = MAX_LENGTH - [...textarea.value].length;
+            counter.textContent = remaining >= 0 ? `あと${remaining}字` : `${-remaining}字オーバー`;
+            counter.classList.toggle('over', remaining < 0);
+        }
+
+        textarea.addEventListener('input', updateCounter);
+        updateCounter();
+    </script>
 </body>
 </html>
