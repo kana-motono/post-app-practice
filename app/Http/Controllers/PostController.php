@@ -15,6 +15,16 @@ class PostController extends Controller
         return view('posts.index', compact('posts'));
     }
 
+    public function show(Post $post)
+    {
+        $post->load(['user', 'category']);
+
+        // 古い順に並べ、同時刻なら id 順にする
+        $replies = $post->replies()->with('user')->orderBy('created_at')->orderBy('id')->get();
+
+        return view('posts.show', compact('post', 'replies'));
+    }
+
     public function edit(Post $post)
     {
         $this->authorize('update', $post);
