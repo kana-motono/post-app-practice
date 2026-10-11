@@ -66,4 +66,14 @@ class PostContentLimitTest extends TestCase
 
         $this->assertSame("あ\n".str_repeat('い', 138), $this->post->fresh()->content);
     }
+
+    public function test_編集画面に残り文字数が表示される(): void
+    {
+        // 元の本文「元の本文」は4字 → 残り136字
+        $this->actingAs($this->user)
+            ->get(route('posts.edit', $this->post))
+            ->assertOk()
+            ->assertSee('id="content-counter"', false)
+            ->assertSee('あと136字');
+    }
 }
