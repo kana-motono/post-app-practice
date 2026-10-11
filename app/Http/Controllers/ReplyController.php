@@ -11,9 +11,12 @@ class ReplyController extends Controller
     public function store(Request $request, Post $post)
     {
         // ブラウザは改行を CRLF で送るため、LF に揃えてから文字数を数える
-        $request->merge([
-            'content' => str_replace("\r\n", "\n", (string) $request->input('content')),
-        ]);
+        // 配列などの文字列でない値はそのまま string ルールに判定させる
+        if (is_string($request->input('content'))) {
+            $request->merge([
+                'content' => str_replace("\r\n", "\n", $request->input('content')),
+            ]);
+        }
 
         $validated = $request->validate([
             'content' => 'required|string|max:140',

@@ -182,6 +182,15 @@ class ReplyTest extends TestCase
         $this->assertDatabaseCount('replies', 0);
     }
 
+    public function test_本文が配列だと500にならず文字列エラーになりリプライは増えない(): void
+    {
+        $this->actingAs($this->other)
+            ->post(route('replies.store', $this->post), ['content' => ['あ']])
+            ->assertSessionHasErrors(['content' => 'リプライは文字列で入力してください。']);
+
+        $this->assertDatabaseCount('replies', 0);
+    }
+
     public function test_エラー後の画面にメッセージと入力済みの本文が表示される(): void
     {
         $tooLong = str_repeat('あ', 140).'オーバー';
