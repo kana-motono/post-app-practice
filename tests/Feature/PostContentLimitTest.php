@@ -67,6 +67,17 @@ class PostContentLimitTest extends TestCase
         $this->assertSame("あ\n".str_repeat('い', 138), $this->post->fresh()->content);
     }
 
+    public function test_本文が配列だと500にならずエラーになり保存されない(): void
+    {
+        $this->actingAs($this->user)->put(route('posts.update', $this->post), [
+            'title' => '元のタイトル',
+            'category_id' => $this->category->id,
+            'content' => ['あ'],
+        ])->assertSessionHasErrors('content');
+
+        $this->assertSame('元の本文', $this->post->fresh()->content);
+    }
+
     public function test_編集画面に残り文字数が表示される(): void
     {
         // 元の本文「元の本文」は4字 → 残り136字

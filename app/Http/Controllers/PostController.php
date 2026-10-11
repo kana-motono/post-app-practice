@@ -15,6 +15,16 @@ class PostController extends Controller
         return view('posts.index', compact('posts'));
     }
 
+    public function show(Post $post)
+    {
+        $post->load(['user', 'category']);
+
+        // 古い順に並べ、同時刻なら id 順にする
+        $replies = $post->replies()->with('user')->orderBy('created_at')->orderBy('id')->get();
+
+        return view('posts.show', compact('post', 'replies'));
+    }
+
     public function edit(Post $post)
     {
         $this->authorize('update', $post);
@@ -29,9 +39,12 @@ class PostController extends Controller
         $this->authorize('update', $post);
 
         // ブラウザは改行を CRLF で送るため、LF に揃えてから文字数を数える
-        $request->merge([
-            'content' => str_replace("\r\n", "\n", (string) $request->input('content')),
-        ]);
+        // 配列などの文字列でない値はそのまま string ルールに判定させる
+        if (is_string($request->input('content'))) {
+            $request->merge([
+                'content' => str_replace("\r\n", "\n", $request->input('content')),
+            ]);
+        }
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
