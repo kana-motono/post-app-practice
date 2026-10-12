@@ -22,7 +22,6 @@ Everything runs through Laravel Sail (Docker); there is no local PHP/MySQL setup
 ```
 
 - If the first `migrate` fails with "Connection refused", MySQL is still starting — wait and retry.
-- Tests run against MySQL using a separate `testing` database (set in `phpunit.xml`; Sail's MySQL container creates it on first boot). They are not SQLite/in-memory.
 - Practice accounts after seeding: `usera@example.com` / `userb@example.com`, password `password`. Each owns 2 posts (A: `/posts/1`, `/posts/2`; B: `/posts/3`, `/posts/4`). Seeded categories: お知らせ・技術メモ・雑記.
 
 ## Architecture
@@ -41,12 +40,6 @@ Everything runs through Laravel Sail (Docker); there is no local PHP/MySQL setup
 - **リプライ:** 詳細ページに古い順（同時刻は id 順）で表示する。
 - **入力チェックのメッセージは日本語で出す。** アプリのロケールは `en` で `lang/` も無いため、何も指定しないと Laravel 標準の英語メッセージが出る。新しい入力チェックには、`validate` の第2引数で日本語メッセージを必ず指定し、既存の文言（例: `本文は140字以内で入力してください。`、`リプライは140字以内で入力してください。`）に口調を合わせる。
 - 本文・リプライの140字は、改行を CRLF→LF に揃えてから数える。
-
-## 実装とテストの進め方
-
-- 実装を頼まれたら、テストも書く（`tests/Feature/`、既存のテストの書き方に合わせる）。
-- `./vendor/bin/sail test` で全テストを回し、落ちたら通るまで直す。
-- 最後に、実行したコマンドと結果（通った件数・落ちたテスト）を報告する。回せなかった場合は、回せなかったと理由を書く。
 
 ## PRの書き方
 
