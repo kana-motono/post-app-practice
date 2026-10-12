@@ -13,5 +13,19 @@
       "Read(.env)",
       "Read(.env.*)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && out=$(./vendor/bin/sail test 2>&1); rc=$?; if [ $rc -ne 0 ]; then printf '%s\\n' \"$out\" | grep -v '^PHP Deprecated' | tail -80 >&2; exit 2; fi",
+            "timeout": 180
+          }
+        ]
+      }
+    ]
   }
 }

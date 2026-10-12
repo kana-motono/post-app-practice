@@ -62,6 +62,7 @@ class PostController extends Controller
     {
         $this->authorize('delete', $post);
 
+        // 投稿者本人だけがポストを削除できる（付いているリプライも DB のカスケードで一緒に消える）
         $post->delete();
 
         return redirect()->route('posts.index');
