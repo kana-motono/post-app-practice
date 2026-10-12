@@ -33,6 +33,28 @@ Everything runs through Laravel Sail (Docker); there is no local PHP/MySQL setup
 - **Data model:** `User` 1–n `Post` n–1 `Category`. `posts.user_id` cascades on user delete; `posts.category_id` does not cascade. Validation is inline in the controller (`$request->validate`), not in FormRequests; `store` and `update` share it via the private `PostController::validatedPostData` (title ≤255, content ≤140 after CRLF→LF, `category_id` must be an integer that exists).
 - **Views** are standalone Blade files with inline `<style>`. There is no shared layout and no Vite/`@vite` usage, even though `vite.config.js`/`package.json` exist. Node is not needed to run the app.
 
+## アプリの前提（依頼のたびに書かなくてよいもの）
+
+依頼文に書かれていなくても、次の現状を前提にし、今ある動き（一覧・編集・削除）を壊さないようにする。機能の追加や、依頼された変更は妨げない。既存の動きが変わってしまう場合だけ、その旨を伝える。
+
+- **タイムライン（`/posts`）の動き:** 全ユーザーのポストを新しい順に表示する（同時刻は id の大きい方が先）。投稿フォームは一覧の上部にあり、本文の残り文字数を表示する。ポストのタイトルから `/posts/{post}`（詳細・リプライ）へ移動できる。編集・削除ボタンは投稿者本人にだけ表示し、投稿者以外は操作できない（403）。
+- **リプライ:** 詳細ページに古い順（同時刻は id 順）で表示する。
+- **入力チェックのメッセージは日本語で出す。** アプリのロケールは `en` で `lang/` も無いため、何も指定しないと Laravel 標準の英語メッセージが出る。新しい入力チェックには、`validate` の第2引数で日本語メッセージを必ず指定し、既存の文言（例: `本文は140字以内で入力してください。`、`リプライは140字以内で入力してください。`）に口調を合わせる。
+- 本文・リプライの140字は、改行を CRLF→LF に揃えてから数える。
+
+## 実装とテストの進め方
+
+- 実装を頼まれたら、テストも書く（`tests/Feature/`、既存のテストの書き方に合わせる）。
+- `./vendor/bin/sail test` で全テストを回し、落ちたら通るまで直す。
+- 最後に、実行したコマンドと結果（通った件数・落ちたテスト）を報告する。回せなかった場合は、回せなかったと理由を書く。
+
+## PRの書き方
+
+PR本文には次の2つを書く。
+
+- **テスト結果:** 実行したコマンドと、通った／落ちた件数。
+- **受け入れ条件との突き合わせ:** 条件を1つずつ挙げ、満たしているかと、その根拠（テスト名・該当ファイル）を対応させる。満たしていない条件があれば、そのまま書く。
+
 ## Repository notes
 
 - `answers/` holds Tutorial 13 model answers for the design documents (Markdown + draw.io). It is **not** part of the app and has no effect on its behavior. Don't read or change it when working on app features.
