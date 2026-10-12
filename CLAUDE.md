@@ -15,9 +15,9 @@ Everything runs through Laravel Sail (Docker); there is no local PHP/MySQL setup
 ./vendor/bin/sail down                       # stop
 ./vendor/bin/sail artisan migrate --seed     # create tables + practice data
 ./vendor/bin/sail artisan migrate:fresh --seed  # reset DB
-./vendor/bin/sail artisan test               # run all tests
-./vendor/bin/sail artisan test --filter=SomeTest          # single test class/method
-./vendor/bin/sail artisan test tests/Feature/SomeTest.php # single file
+./vendor/bin/sail test                       # run all tests
+./vendor/bin/sail test --filter=SomeTest          # single test class/method
+./vendor/bin/sail test tests/Feature/SomeTest.php # single file
 ./vendor/bin/sail pint                       # format (Laravel Pint)
 ```
 
@@ -40,6 +40,7 @@ Everything runs through Laravel Sail (Docker); there is no local PHP/MySQL setup
 - **リプライ:** 詳細ページに古い順（同時刻は id 順）で表示する。
 - **入力チェックのメッセージは日本語で出す。** アプリのロケールは `en` で `lang/` も無いため、何も指定しないと Laravel 標準の英語メッセージが出る。新しい入力チェックには、`validate` の第2引数で日本語メッセージを必ず指定し、既存の文言（例: `本文は140字以内で入力してください。`、`リプライは140字以内で入力してください。`）に口調を合わせる。
 - 本文・リプライの140字は、改行を CRLF→LF に揃えてから数える。
+- **一覧で関連データを使うときは `with()` で先読みする**（N+1 を避ける）。今の `PostController::index` も `Post::with(['user', 'category'])`、詳細のリプライも `with('user')` で取得している。
 
 ## PRの書き方
 
