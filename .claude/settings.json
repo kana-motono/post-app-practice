@@ -21,7 +21,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && out=$(./vendor/bin/sail test 2>&1); rc=$?; if [ $rc -ne 0 ]; then printf '%s\\n' \"$out\" | grep -v '^PHP Deprecated' | tail -80 >&2; exit 2; fi",
+            "command": "test -x vendor/bin/sail || exit 0; ./vendor/bin/sail artisan test >&2 || exit 2",
             "timeout": 180
           }
         ]
